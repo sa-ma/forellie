@@ -11,15 +11,17 @@ type LayoutProps = {
 };
 const Layout = (props: LayoutProps) => {
     return (
-        <main className={styles.post}>
+        <div className={styles.postContainer}>
             <Head>
                 <title>forEllie: {props.meta.title}</title>
                 <meta name='description' content='An ode to my love' />
                 <link rel='icon' href='/favicon.ico' />
             </Head>
-            <ContentNav title={props.meta.title} />
-            {props.children}
-        </main>
+            <div className={styles.post}>
+                <ContentNav title={props.meta.title} />
+                {props.children}
+            </div>
+        </div>
     );
 };
 
