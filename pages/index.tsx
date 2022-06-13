@@ -7,7 +7,7 @@ import Footer from '../components/footer';
 import Draggable from 'react-draggable';
 import { useRouter } from 'next/router';
 
-type DraggableEventHandler = (e: Event, data: DraggableData) => void | false;
+type DraggableEventHandler = (e: Event, location: string, data: DraggableData | null) => void | false;
 type DraggableData = {
     node: HTMLElement;
     // lastX + deltaX === x
@@ -28,8 +28,8 @@ const Home = (props: NextPage) => {
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
 
-    const eventControl: DraggableEventHandler = (event) => {
-        if (['mousemove', 'touchmove'].includes(event.type)) {
+    const eventControl: DraggableEventHandler = (event, location: string) => {
+        if (['mousemove', 'touchmove', 'touchstart'].includes(event.type)) {
             setIsDragging(true);
         }
 
@@ -37,6 +37,9 @@ const Home = (props: NextPage) => {
             setTimeout(() => {
                 setIsDragging(false);
             }, 100);
+        }
+        if (event.type === 'touchend' && !isDragging) {
+            handleNavigation(event, location);
         }
     };
 
@@ -59,11 +62,16 @@ const Home = (props: NextPage) => {
             <Header />
 
             <main className='grid place-items-center h-96'>
-                <Draggable nodeRef={nodeRef} onDrag={eventControl} onStop={eventControl}>
+                <Draggable
+                    nodeRef={nodeRef}
+                    onDrag={(e) => eventControl(e, '/posts/birthday', null)}
+                    onStop={(e) => eventControl(e, '/posts/birthday', null)}
+                >
                     <button
                         draggable={false}
                         ref={nodeRef}
                         onClick={(event) => handleNavigation(event, '/posts/birthday')}
+                        onTouchEnd={(event) => handleNavigation(event, '/posts/birthday')}
                     >
                         <Image draggable={false} src='/folder.png' alt='folder' width={64} height={64} />
                     </button>
