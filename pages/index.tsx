@@ -1,68 +1,77 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import Header from '../components/header';
 import Footer from '../components/footer';
 import Draggable from 'react-draggable';
+import { useRouter } from 'next/router';
 
-type UIType = {
+type DraggableEventHandler = (e: Event, data: DraggableData) => void | false;
+type DraggableData = {
+    node: HTMLElement;
+    // lastX + deltaX === x
+    x: number;
+    y: number;
     deltaX: number;
     deltaY: number;
+    lastX: number;
+    lastY: number;
 };
-class Home extends React.Component<NextPage> {
-    state = {
-        activeDrags: 0,
-        deltaPosition: {
-            x: 0,
-            y: 0,
-        },
+type handleNavProps = {
+    stopPropagation: () => void;
+};
+
+const Home = (props: NextPage) => {
+    const nodeRef = React.useRef(null);
+    const router = useRouter();
+
+    const [isDragging, setIsDragging] = useState<boolean>(false);
+
+    const eventControl: DraggableEventHandler = (event) => {
+        if (['mousemove', 'touchmove'].includes(event.type)) {
+            setIsDragging(true);
+        }
+
+        if (['mouseup', 'touchend'].includes(event.type)) {
+            setTimeout(() => {
+                setIsDragging(false);
+            }, 100);
+        }
     };
-    handleDrag = (e: Event, ui: UIType) => {
-        const { x, y } = this.state.deltaPosition;
-        this.setState({
-            deltaPosition: {
-                x: x + ui.deltaX,
-                y: y + ui.deltaY,
-            },
-        });
+
+    const handleNavigation = (event: handleNavProps, location: string) => {
+        if (isDragging) {
+            event.stopPropagation();
+            return;
+        }
+        router.push(location);
     };
 
-    onStart = () => {
-        let modifiedActiveDrags = this.state.activeDrags;
-        this.setState({ activeDrags: ++modifiedActiveDrags });
-    };
+    return (
+        <div className='container min-h-screen p-6'>
+            <Head>
+                <title>forEllie</title>
+                <meta name='description' content='An ode to my love' />
+                <link rel='icon' href='/favicon.ico' />
+            </Head>
 
-    onStop = () => {
-        let modifiedActiveDrags = this.state.activeDrags;
-        this.setState({ activeDrags: --modifiedActiveDrags });
-    };
-    render(): React.ReactNode {
-        const dragHandlers = { onStart: this.onStart, onStop: this.onStop };
-        return (
-            <div className='container min-h-screen p-6'>
-                <Head>
-                    <title>forEllie</title>
-                    <meta name='description' content='An ode to my love' />
-                    <link rel='icon' href='/favicon.ico' />
-                </Head>
+            <Header />
 
-                <Header />
+            <main className='grid place-items-center h-96'>
+                <Draggable nodeRef={nodeRef} onDrag={eventControl} onStop={eventControl}>
+                    <button
+                        draggable={false}
+                        ref={nodeRef}
+                        onClick={(event) => handleNavigation(event, '/posts/birthday')}
+                    >
+                        <Image draggable={false} src='/folder.png' alt='folder' width={64} height={64} />
+                    </button>
+                </Draggable>
+            </main>
 
-                <main className='grid place-items-center h-96'>
-                    <Draggable {...dragHandlers}>
-                        <div className='box'>
-                            <button draggable={false} className='animate-bounce' onClick={() => null}>
-                                <Image src='/folder.png' alt='folder' width={64} height={64} />
-                            </button>
-                        </div>
-                    </Draggable>
-                </main>
-
-                <Footer />
-            </div>
-        );
-    }
-}
-
+            <Footer />
+        </div>
+    );
+};
 export default Home;
