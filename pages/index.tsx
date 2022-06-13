@@ -53,7 +53,7 @@ class Home extends React.Component<NextPage> {
                     <Draggable {...dragHandlers}>
                         <div className='box'>
                             <button draggable={false} className='animate-bounce' onClick={() => null}>
-                                <Image src='/folder.png' alt='folder' width={48} height={48} />
+                                <Image src='/folder.png' alt='folder' width={64} height={64} />
                             </button>
                         </div>
                     </Draggable>
